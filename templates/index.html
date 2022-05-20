@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="infoscr">
+
+{% if current_user.is_authenticated %}
+Thanks for logging in! <br> You are now able to <a href="/editscreens">edit content</a>.
+{% else %}
+Welcome to the Infoscreen-Webpage!<br>
+To continue, please Login below.<br>
+{% endif %}
+</div>
+
+<div id="clock"></div>
+<script>
+    var clock = document.getElementById("clock");
+
+    setInterval(() => {
+        fetch("{{ url_for('time_feed') }}")
+        .then(response => {
+                response.text().then(t => {clock.innerHTML = t})
+            });
+        }, 1000);  
+</script>
+    
+
+
+    {% endblock %}
+
+
+</html>

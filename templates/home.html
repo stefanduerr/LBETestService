@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+<head></head>
+<body><p>asfasfasf</p>
+
+
+
+
+
+{% if session['id'] %}
+
+<p>Logged in as {{ session['username'] }}.</p>
+<p><a href="/logout">Logout</a></p>
+
+{% else %}
+
+<p><a href="/login">Login</a></p>
+
+{% endif %}
+<input type="submit" name="swi" value="Switch">
+
+<h3>Our Flask Buttons</h3>
+    <form method="post" action="/">
+        <input type="submit" value="VALUE1" name="action1"/>
+        <input type="submit" value="VALUE2" name="action2" />
+    </form>
+
+{% endblock %}

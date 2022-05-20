@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <meta charset="UTF-8">
+    <title>Lifebrain Infoscreen</title>
+</head>
+<body>
+<div class="home-div">
+<div style="text-align:center">
+  <h1>Lifebrain Employee Testing Service</h1>
+  <h2>Welcome to LETS!</h2>
+<!-- <img src="{{ url_for('static',filename='images/logo.svg') }}" width="70px" height="66px"   margin="200" onclick="window.location.href = '/'"> -->
+</div>
+
+<div style="text-align: center;">
+
+    {% block content %}
+    
+
+    
+    {% endblock %}
+  <!-- show error messages -->
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  {% endwith %}
+
+    <div class="loginbox">
+
+
+</div>
+</div>
+</body>
+</html>
