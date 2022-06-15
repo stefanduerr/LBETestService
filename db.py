@@ -1,13 +1,19 @@
+import MySQLdb.converters
 import mysql.connector
 from mysql.connector import Error
 import sys
+
+conv= MySQLdb.converters.conversions.copy()
+conv[246]=float    # convert decimals to floats
+conv[10]=str 
 
 def connect_db():
     try:
         connection = mysql.connector.connect(host='10.90.1.110',
                                             database='LETS',
                                             user='stefan',
-                                            password='Start2020!')
+                                            password='Start2020!'
+                                            )
         if connection.is_connected():
             db_Info = connection.get_server_info()
             print("Connected to MySQL Server version ", db_Info, file=sys.stdout)
@@ -17,7 +23,8 @@ def connect_db():
             print("You're connected to database: ", record, file=sys.stdout)
     except Error as e:
         print("Error while connecting to MySQL", e, file=sys.stdout)
-    return connection, cursor
+    if 'connection' in locals():
+        return connection, cursor
 
 def deprecated():
     try:

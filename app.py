@@ -12,6 +12,7 @@ from flask_bcrypt import Bcrypt
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
+import LETS
 
 key = 'AAAACCCC'
 c_con, c_curs = db.connect_db()
@@ -31,8 +32,8 @@ mysql = MySQL(app)
 bcrypt = Bcrypt(app)
 app.config.from_mapping(config)
 
-c_curs.execute("SELECT id FROM users WHERE id='{}'".format(1))
-print(c_curs.fetchone(), file=sys.stdout)
+# c_curs.execute("SELECT id FROM users WHERE id='{}'".format(1))
+# print(c_curs.fetchone(), file=sys.stdout)
     
 #was ist user id? wie kann ich aus der datenbank user abrufen? SELECT * FROM users WHERE user='admin'
 
@@ -111,9 +112,16 @@ def logout():
    # Redirect to login page
    return redirect(url_for('home'))
 
-@app.route("/covid_test")
+@app.route("/covid_test", methods=['GET', 'POST'])
 def covid_test():
-    if 'loggedin' in session:    
+    if 'loggedin' in session:
+        if request.method == 'POST' and 'nfccard' in request.form.to_dict():
+            default_value = '0'
+            data = request.form.to_dict(flat=False)
+            data = data.get('nfccard')
+            print(data, file=sys.stdout)  
+            print(LETS.map_serial_to_emp_number(data))
+            print(data, file=sys.stdout)  
         return render_template('covid_test.html')
     else:
         return redirect(url_for('home'))

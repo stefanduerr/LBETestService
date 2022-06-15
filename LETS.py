@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np, numpy.random
 import db
+import socket
 
 c_con, c_curs = db.connect_db()
 headers = {
@@ -34,7 +35,7 @@ def measure_time(x):
     else:
       timearr2.append(end * 10000)
 
-def map_serial_to_emp_number():
+def map_serial_to_emp_number(card_number):
   barcode_taken = True
 
   while barcode_taken:
@@ -45,7 +46,9 @@ def map_serial_to_emp_number():
       c_con.commit()
       barcode_taken = False
 
-  card_number = str("['" + input() + "']").lower()
+  # card_number = str("['" + input() + "']").lower()
+  # print(card_number)
+  card_number = str(card_number).lower()
   print(card_number)
   counter = 1
   employeeData = ''
@@ -61,6 +64,14 @@ def map_serial_to_emp_number():
         empNr = str(i['partnerLastNamePrefix'])[-4:]
         SVNr = str(i['partnerLastNamePrefix'])[:-5]
         dateOfBirth = str(i['partnerLastNamePrefix'])[4:-5]
+        dyflexisid = str(i['dyflexisId'])
+        firstName = str(i['firstName'])
+        lastName = str(i['lastName'])
+
+        c_curs.execute("SELECT DATE_FORMAT(gebdat, '%Y-%m-%d') FROM gebdats WHERE dyfid='{}'".format(dyflexisid))
+        # c_curs.execute("SHOW COLUMNS FROM gebdats".format(dyflexisid))
+        # print(str(c_curs.fetchone()))
+
 
         json_data = ('''
         {{"sender_id": "Lifebrain",
@@ -71,13 +82,37 @@ def map_serial_to_emp_number():
         "EmpNr": "{}",
         "date_of_birth": "{}",
         "barcode": "{}"}}
-        ''').format(i['firstName'], i['lastName'], i['email'], SVNr, empNr, dateOfBirth, barcode)
+        ''').format(firstName, lastName, i['email'], SVNr, empNr, str(c_curs.fetchone()[0]), barcode)
 
     employeeData = str(employeeData)
     # print(employeeData)
     if employeeData != '[]':
       counter += 1
-  return json_data
+  if 'json_data' in locals():
+    mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)         
+    host = "10.90.1.126" 
+    port = 9100   
+    name = lastName.encode('utf-8')
+    firstName = firstName.encode('utf-8')
+    ebarcode = barcode.encode('utf-8')
+    label = 'Lifebrain Employee Testing Service'.encode('utf-8')
+    try:           
+      mysocket.connect((host, port)) #connecting to host
+      mysocket.send(b'^XA'
+      b'^CI28'
+      b'^LH00,15'
+      b'^BY2,3,50'
+      b'^FO33,0^BCN,80,N,Y,N^FD' + ebarcode + b'^FS'
+      b'^FO85,90^A0N,30,35^FD' + ebarcode + b'^FS'
+      b'^FO30,125^A0N,20,35^FD' + name + b', ' + firstName + b'^FS'
+      b'^FO30,150^A0N,18,24^FD' + label + b'^FS'
+      b'^XZ')
+      mysocket.close () #closing connection
+    except:
+      print("Error with the connection")
+    return json_data
+  else:
+    return 'Card may not exist in our system or the list is corrupt.'
 
 def printjson():
   counter = 1
@@ -88,7 +123,7 @@ def printjson():
     employeeData = r.json()["employeeData"]
     print(employeeData)
 
-    
+    employeeData = str(employeeData)
     if employeeData != '[]':
       counter += 1
 
@@ -216,7 +251,7 @@ def plot_time(iters):
 
 # GUI, Karte hinhalten? WebApp?
 # print(map_serial_to_emp_number())
-printjson()
+# printjson()
 # Send JSON to Orchestra
 
 # wait (async?)
