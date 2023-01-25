@@ -91,8 +91,6 @@ def login():
             if account and pw_check:
                 session['loggedin'] = True
                 session['id'] = account[0]
-                # print(account['id'], file=sys.stdout)
-                # print(account['user'], file=sys.stdout)
                 session['username'] = account[1]
                 print(session, file=sys.stdout)
                 return redirect('/home')
@@ -112,6 +110,7 @@ def logout():
    # Redirect to login page
    return redirect(url_for('home'))
 
+# Testsystem-Domain
 @app.route("/covid_test", methods=['GET', 'POST'])
 def covid_test():
     if 'loggedin' in session:
