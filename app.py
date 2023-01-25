@@ -19,6 +19,7 @@ c_con, c_curs = db.connect_db()
 global switch2
 switch2 = False
 
+# Config-Dict
 config = {
     "SECRET_KEY": "6d8ed540960d1085d183d8e5d236f2da",
     "TEMPLATES_AUTO_RELOAD": True,
@@ -31,11 +32,9 @@ config = {
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
 app.config.from_mapping(config)
-
-# c_curs.execute("SELECT id FROM users WHERE id='{}'".format(1))
-# print(c_curs.fetchone(), file=sys.stdout)
     
 #was ist user id? wie kann ich aus der datenbank user abrufen? SELECT * FROM users WHERE user='admin'
+# Insert User into DB
 
 def insert_user(username, password):
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -45,7 +44,8 @@ def insert_user(username, password):
     print(record, file=sys.stdout)
     c_con.commit()
 
-# insert_user('admin1', 'king')
+
+# Standard-Routings für MVP Website
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home", methods=['GET', 'POST'])
@@ -129,16 +129,3 @@ def covid_test():
 
 if __name__ == '__main__':
     app.run(debug=False)
-
-
-        # {% if current_user.is_authenticated %}
-        # Currently logged in as <b>{{ current_user.username }}</b>
-        # <b><a href="{{ url_for('home') }}">Home</a></b> |
-        # <b><a href="{{ url_for('editscreens') }}">Videos</a></b> |
-        # <b><a href="{{ url_for('logout') }}">Logout</a></b>
-        # {% else %}
-        # <b><a href="{{ url_for('home') }}">Home</a></b> |
-        # <b><a href="{{ url_for('login') }}">Login</a></b> |
-        # <b><a href="{{ url_for('register') }}">Register</a></b>
-        # {% endif %}
-        # </div>

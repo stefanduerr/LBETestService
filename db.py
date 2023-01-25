@@ -7,6 +7,8 @@ conv= MySQLdb.converters.conversions.copy()
 conv[246]=float    # convert decimals to floats
 conv[10]=str 
 
+# Connect the Database
+
 def connect_db():
     try:
         connection = mysql.connector.connect(host='10.90.1.110',

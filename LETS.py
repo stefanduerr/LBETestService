@@ -10,6 +10,7 @@ import numpy as np, numpy.random
 import db
 import socket
 
+# Connect Database
 c_con, c_curs = db.connect_db()
 headers = {
   'Accept': 'application/json',
@@ -21,6 +22,7 @@ timearr2 = []
 runs = []
 cou = 0
 
+# Zeitmessung der Barcodegenerierung
 def measure_time(x):
   global cou
   
@@ -35,6 +37,7 @@ def measure_time(x):
     else:
       timearr2.append(end * 10000)
 
+# Wichtige Daten für Mitarbeitertests werden aus der "Dyflexis"-API extrahiert
 def map_serial_to_emp_number(card_number):
   barcode_taken = True
 
@@ -46,8 +49,6 @@ def map_serial_to_emp_number(card_number):
       c_con.commit()
       barcode_taken = False
 
-  # card_number = str("['" + input() + "']").lower()
-  # print(card_number)
   card_number = str(card_number).lower()
   print(card_number)
   counter = 1
@@ -56,7 +57,7 @@ def map_serial_to_emp_number(card_number):
     r = requests.get('https://app.planning.nu/lifebrain/api2/employee-data?page={}'.format(counter), headers = headers)
     employeeData = r.json()["employeeData"]
 
-    # print(counter)
+
     for i in employeeData:
       if str(i['cardNumbers']) == card_number:
         print(i['firstName'])
@@ -69,9 +70,6 @@ def map_serial_to_emp_number(card_number):
         lastName = str(i['lastName'])
 
         c_curs.execute("SELECT DATE_FORMAT(gebdat, '%Y-%m-%d') FROM gebdats WHERE dyfid='{}'".format(dyflexisid))
-        # c_curs.execute("SHOW COLUMNS FROM gebdats".format(dyflexisid))
-        # print(str(c_curs.fetchone()))
-
 
         json_data = ('''
         {{"sender_id": "Lifebrain",
@@ -85,9 +83,11 @@ def map_serial_to_emp_number(card_number):
         ''').format(firstName, lastName, i['email'], SVNr, empNr, str(c_curs.fetchone()[0]), barcode)
 
     employeeData = str(employeeData)
-    # print(employeeData)
+
     if employeeData != '[]':
       counter += 1
+
+# Daten werden an Drucker gesendet, Drucker druckt Barcode mit Mitarbeiternamen
   if 'json_data' in locals():
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)         
     host = "10.90.1.126" 
@@ -127,7 +127,7 @@ def printjson():
     if employeeData != '[]':
       counter += 1
 
-
+# Visualisierungsfunktion (Spielerei)
 def plot_gaussian(iters):
   sample_string = 'ABCDEFGHIJKLMNOPQRSTUVWX0123456789'
   prefix = 'EMPS'
@@ -167,6 +167,9 @@ def plot_gaussian(iters):
     avg = sum / len(arr)    
     return avg, lowest
 
+# Verschiedene Attempts, Barcodes zu generieren
+
+## ATTEMPT 1 ##
 def generate_barcode():
   
   sample_string = 'ABCDEFGHIJKLMNOPQRSTUVWX0123456789'
@@ -184,10 +187,10 @@ def generate_barcode():
   
   return val, bar_code
 
+## ATTEMPT 2 ##
 def construct_barcode(length):
   
   map_chars = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X']
-  # length = 8
   max_val = 33
   amount_of_v = max_val + 1
   avg_val_sum = length * (max_val / 2)
@@ -217,9 +220,9 @@ def construct_barcode(length):
   for i in range(len(arr)):
     string = string + map_chars[int(arr[i])]
   
-  
   return 'EMPS' + string
 
+# Visualisierungsfunktion für Laufzeit (Spielerei)
 def plot_time(iters):
   for i in range(iters):
     (construct_barcode(8))
@@ -239,19 +242,16 @@ def plot_time(iters):
   plt.plot(x, timearr2, label = "Runtime of constructing barcode")
   plt.xlabel('Iterations')
   plt.ylabel('microseconds')
-  # plt.plot(x, runs, label = 'Number of iterations')
   plt.suptitle('Runtime comparison, in µs', fontsize=20)
   plt.title('Constructing barcode was faster {} times. \n Searching for barcode was faster {} times.'.format(sr_cons, sr_sear), fontsize=12)
   plt.legend()
   plt.show()
   
 
-# plot_gaussian(10000000)
-# plot_time(2000)
+
+# Ablauf
 
 # GUI, Karte hinhalten? WebApp?
-# print(map_serial_to_emp_number())
-# printjson()
 # Send JSON to Orchestra
 
 # wait (async?)
